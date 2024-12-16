@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ground
   - Enemy
+  - Coin
   layers:
   - Default
   - TransparentFX
@@ -42,4 +43,13 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 1517014713
+    locked: 0
+  - name: Player
+    uniqueID: 2198180827
+    locked: 0
+  - name: Foreground
+    uniqueID: 2788231665
     locked: 0

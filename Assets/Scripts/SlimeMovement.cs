@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using TMPro;
 
 public class SlimeMovement : MonoBehaviour
 {
@@ -14,54 +15,48 @@ public class SlimeMovement : MonoBehaviour
     private bool isDead = false;
     private bool isHurt = false;
 
+    // Coin Collection
+    private int coinCounter = 0; // Tracks collected coins
+    public TMP_Text counter_Text;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
+
+        coinCounter = 0;
+        UpdateCoinUI();
     }
 
-    private void Update()
+    private void Start()
+    {
+        UpdateCoinUI();
+    }
+
+    void Update()
     {
         if (isDead || isHurt) return;
 
-        HandleMovementInput();
-        HandleJumpInput();
-        UpdateAnimatorParameters();
+        HandleMovement();
+        HandleJump();
     }
 
-    private void FixedUpdate()
+    private void HandleMovement()
     {
-        if (!isDead && !isHurt)
-        {
-            // Handle movement directly
-            float horizontalVal = Input.GetAxisRaw("Horizontal");
-            bool isRunning = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        bool isRunning = Input.GetKey(KeyCode.LeftShift);
 
-            float velocityX = horizontalVal * baseVelocity * (isRunning ? runMultiplier : 1f);
-            rb.velocity = new Vector2(velocityX, rb.velocity.y);
-        }
+        float speed = baseVelocity * (isRunning ? runMultiplier : 1f);
+        rb.velocity = new Vector2(horizontal * speed, rb.velocity.y);
+
+        animator.SetFloat("VelocityX", Mathf.Abs(rb.velocity.x));
+        animator.SetBool("isGrounded", isGrounded);
+
+        if (horizontal != 0)
+            transform.localScale = new Vector3(Mathf.Sign(horizontal), 1, 1);
     }
 
-    private void HandleMovementInput()
-    {
-        float horizontalVal = Input.GetAxisRaw("Horizontal");
-        bool isWalking = horizontalVal != 0;
-        bool isRunning = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-
-        // Update animation states
-        animator.SetBool("isWalking", isWalking);
-        animator.SetBool("isRunning", isWalking && isRunning);
-
-        // Flip sprite direction
-        if (isWalking)
-            transform.localScale = new Vector3(Mathf.Sign(horizontalVal), 1, 1);
-
-        // Calculate velocity
-        float velocityX = horizontalVal * baseVelocity * (isRunning ? runMultiplier : 1f);
-        rb.velocity = new Vector2(velocityX, rb.velocity.y);
-    }
-
-    private void HandleJumpInput()
+    private void HandleJump()
     {
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
@@ -71,21 +66,30 @@ public class SlimeMovement : MonoBehaviour
         }
     }
 
-    private void UpdateAnimatorParameters()
-    {
-        animator.SetBool("isGrounded", isGrounded);
-        animator.SetFloat("VelocityX", Mathf.Abs(rb.velocity.x));
-    }
-
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
-        {
             isGrounded = true;
-        }
-        else if (collision.gameObject.CompareTag("Enemy"))
-        {
+
+        if (collision.gameObject.CompareTag("Enemy"))
             TriggerHurt();
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Coin")) // Detect the coin
+        {
+            coinCounter++; // Increment coin count
+            UpdateCoinUI(); // Update UI
+            Destroy(collision.gameObject); // Remove the coin from the scene
+        }
+    }
+
+    private void UpdateCoinUI()
+    {
+        if (counter_Text != null)
+        {
+            counter_Text.text = "Coins: " + coinCounter.ToString();
         }
     }
 
@@ -95,13 +99,12 @@ public class SlimeMovement : MonoBehaviour
 
         isHurt = true;
         animator.SetTrigger("Hurt");
-        rb.velocity = Vector2.zero;
         StartCoroutine(RecoverFromHurt());
     }
 
     private IEnumerator RecoverFromHurt()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1.0f);
         isHurt = false;
     }
 
@@ -111,6 +114,5 @@ public class SlimeMovement : MonoBehaviour
 
         isDead = true;
         animator.SetTrigger("Dead");
-        rb.velocity = Vector2.zero;
     }
 }
