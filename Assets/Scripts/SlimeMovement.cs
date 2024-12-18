@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public class SlimeMovement : MonoBehaviour
 {
@@ -27,11 +28,16 @@ public class SlimeMovement : MonoBehaviour
     public TMP_Text healthText;
 
     // Coin Collection
-    private int coinCounter = 0;
+    private int coinCounter = 0; // Local coin counter
     public TMP_Text counter_Text;
 
     // Audio Clips for SFX
     public AudioClip hurtSFX;
+
+    // Death Screen UI
+    public GameObject deathScreen; // Assign this in the Inspector
+    public Button restartButton;   // Assign Restart Button
+    public Button menuButton;      // Assign Menu Button
 
     private void Awake()
     {
@@ -43,8 +49,27 @@ public class SlimeMovement : MonoBehaviour
         currentHealth = maxHealth;
         UpdateHealthUI();
 
-        coinCounter = 0;
-        UpdateCoinUI();
+        // Load coins ONLY if transitioning to a new level
+        if (PlayerPrefs.HasKey("CoinCount"))
+        {
+            coinCounter = PlayerPrefs.GetInt("CoinCount");
+            UpdateCoinUI();
+        }
+        else
+        {
+            coinCounter = 0;
+            UpdateCoinUI();
+        }
+
+        // Ensure Death Screen is hidden at start
+        if (deathScreen != null)
+            deathScreen.SetActive(false);
+
+        // Hook up button events
+        if (restartButton != null)
+            restartButton.onClick.AddListener(RestartLevel);
+        if (menuButton != null)
+            menuButton.onClick.AddListener(BackToMenu);
     }
 
     void Update()
@@ -109,6 +134,13 @@ public class SlimeMovement : MonoBehaviour
         {
             counter_Text.text = "Coins: " + coinCounter.ToString();
         }
+    }
+
+    public void SaveCoinsOnLevelComplete()
+    {
+        // Save coins when transitioning to the next level
+        PlayerPrefs.SetInt("CoinCount", coinCounter);
+        PlayerPrefs.Save();
     }
 
     private void TakeDamage(int damage)
@@ -186,5 +218,27 @@ public class SlimeMovement : MonoBehaviour
 
         isDead = true;
         animator.SetTrigger("Dead");
+
+        // Stop all movement and disable physics
+        rb.velocity = Vector2.zero; // Stop rigidbody movement
+        rb.simulated = false;       // Disable physics simulation
+
+        // Show Death Screen
+        if (deathScreen != null)
+            deathScreen.SetActive(true);
+
+        // Reset coin count on death
+        PlayerPrefs.DeleteKey("CoinCount");
+    }
+
+
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void BackToMenu()
+    {
+        SceneManager.LoadScene("StartMenu"); // Replace "MainMenu" with your actual menu scene name
     }
 }
