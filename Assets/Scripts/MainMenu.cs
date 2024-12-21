@@ -35,7 +35,7 @@ public class MainMenu : MonoBehaviour
         ResetCoins();
 
         // Load the first scene (or next scene)
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        SceneManager.LoadScene("LevelSelection");
     }
 
     public void QuitGame()

@@ -5,17 +5,19 @@ public class EnterPortal : MonoBehaviour
 {
     private bool isNearPortal = false;
 
-    [SerializeField] private string nextSceneName;
-    [SerializeField] private GameObject uiPrompt; // UI prompt to display "Press E to Enter"
+    [SerializeField] private string nextSceneName; // Name of the next scene to load
+    [SerializeField] private GameObject uiPrompt;  // UI prompt to display "Press E to Enter"
 
-    void Start()
+    private void Start()
     {
+        // Ensure the UI prompt is hidden at the start
         if (uiPrompt != null)
             uiPrompt.SetActive(false);
     }
 
-    void Update()
+    private void Update()
     {
+        // Check if the player is near the portal and presses 'E'
         if (isNearPortal && Input.GetKeyDown(KeyCode.E))
         {
             SaveCoinsAndLoadNextScene();
@@ -55,6 +57,10 @@ public class EnterPortal : MonoBehaviour
         if (player != null)
         {
             player.SaveCoinsOnLevelComplete();
+        }
+        else
+        {
+            Debug.LogWarning("SlimeMovement script not found. Coins will not be saved.");
         }
 
         // Load the next scene

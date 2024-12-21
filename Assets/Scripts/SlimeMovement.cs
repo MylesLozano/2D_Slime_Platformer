@@ -39,6 +39,8 @@ public class SlimeMovement : MonoBehaviour
     public Button restartButton;   // Assign Restart Button
     public Button menuButton;      // Assign Menu Button
 
+    public int currentLevel; // Set this in the Inspector (e.g., 1 for Level 1, 2 for Level 2)
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -223,6 +225,9 @@ public class SlimeMovement : MonoBehaviour
         rb.velocity = Vector2.zero; // Stop rigidbody movement
         rb.simulated = false;       // Disable physics simulation
 
+        // Unlock the next level
+        UnlockNextLevel();
+
         // Show Death Screen
         if (deathScreen != null)
             deathScreen.SetActive(true);
@@ -231,7 +236,6 @@ public class SlimeMovement : MonoBehaviour
         PlayerPrefs.DeleteKey("CoinCount");
     }
 
-
     public void RestartLevel()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
@@ -239,6 +243,26 @@ public class SlimeMovement : MonoBehaviour
 
     public void BackToMenu()
     {
+        // Unlock the next level
+        UnlockNextLevel();
+
         SceneManager.LoadScene("StartMenu"); // Replace "MainMenu" with your actual menu scene name
+    }
+
+    private void UnlockNextLevel()
+    {
+        int nextLevel = currentLevel + 1;
+
+        // Unlock the next level by updating PlayerPrefs
+        if (PlayerPrefs.GetInt($"Level{nextLevel}Unlocked", 0) == 0)
+        {
+            PlayerPrefs.SetInt($"Level{nextLevel}Unlocked", 1);
+            PlayerPrefs.Save();
+            Debug.Log($"Level {nextLevel} unlocked!");
+        }
+        else
+        {
+            Debug.Log($"Level {nextLevel} is already unlocked.");
+        }
     }
 }
