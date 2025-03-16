@@ -194,7 +194,13 @@ MonoBehaviour:
   healthBar: {fileID: 0}
   healthText: {fileID: 0}
   counter_Text: {fileID: 0}
+  deathScreen: {fileID: 0}
+  restartButton: {fileID: 0}
+  menuButton: {fileID: 0}
   hurtSFX: {fileID: 8300000, guid: 8ada8843bf313ea4f99b1a22fa87847d, type: 3}
+  jumpSFX: {fileID: 0}
+  coinSFX: {fileID: 8300000, guid: 6fdd5541162154a4697f7ade3ed1cb8a, type: 3}
+  currentLevel: 1
 --- !u!70 &7348003405228000844
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

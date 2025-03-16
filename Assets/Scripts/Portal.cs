@@ -5,20 +5,15 @@ using UnityEngine;
 public class Portal : MonoBehaviour
 {
     private HashSet<GameObject> portalObjects = new HashSet<GameObject>();
-    [SerializeField] private Transform destination;
 
-    // Add this for the portal sound effect
-    [SerializeField] private AudioClip portalSFX;
-    private AudioSource audioSource;
+    [SerializeField] private Transform destination; // Destination transform for the portal
+    [SerializeField] private AudioClip portalSFX; // Portal sound effect
+    [SerializeField] private AudioSource audioSource;
 
     private void Awake()
     {
         // Get or add an AudioSource component
-        audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = gameObject.AddComponent<AudioSource>();
-        }
+        audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -59,6 +54,10 @@ public class Portal : MonoBehaviour
         if (portalSFX != null && audioSource != null)
         {
             audioSource.PlayOneShot(portalSFX);
+        }
+        else
+        {
+            Debug.LogWarning("Portal AudioSource or AudioClip is not set.");
         }
     }
 }

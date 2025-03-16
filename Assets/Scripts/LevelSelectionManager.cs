@@ -4,11 +4,19 @@ using UnityEngine.UI;
 
 public class LevelSelectionManager : MonoBehaviour
 {
-    public Button[] levelButtons;
-    public GameObject[] lockIcons; // Array for lock icons
+    [SerializeField] private Button[] levelButtons; // Array for level buttons
+    [SerializeField] private GameObject[] lockIcons; // Array for lock icons
 
     private void Start()
     {
+        // Ensure arrays are of the same length
+        if (levelButtons.Length != lockIcons.Length)
+        {
+            Debug.LogError("LevelButtons and LockIcons arrays must be of the same length. Disabling LevelSelectionManager.");
+            this.enabled = false;
+            return;
+        }
+
         // Unlock the first level by default
         if (!PlayerPrefs.HasKey("Level1Unlocked"))
         {
@@ -26,7 +34,7 @@ public class LevelSelectionManager : MonoBehaviour
             levelButtons[i].interactable = isUnlocked;
 
             // Show or hide lock icons
-            if (lockIcons != null && lockIcons.Length > i && lockIcons[i] != null)
+            if (lockIcons[i] != null)
             {
                 lockIcons[i].SetActive(!isUnlocked); // Show lock icon if the level is locked
             }

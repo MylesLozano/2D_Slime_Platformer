@@ -3,10 +3,16 @@ using UnityEngine.SceneManagement;
 
 public class LevelManager : MonoBehaviour
 {
-    public int currentLevel; // Set this in the Inspector (e.g., 1 for Level 1, 2 for Level 2)
+    [SerializeField] private int currentLevel; // Set this in the Inspector (e.g., 1 for Level 1, 2 for Level 2)
 
     public void CompleteLevel()
     {
+        if (currentLevel <= 0)
+        {
+            Debug.LogError("Current level is not set or invalid. Please set the currentLevel in the inspector.");
+            return;
+        }
+
         // Unlock the next level
         UnlockNextLevel();
 

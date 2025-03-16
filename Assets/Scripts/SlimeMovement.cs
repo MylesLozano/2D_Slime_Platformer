@@ -6,64 +6,84 @@ using UnityEngine.SceneManagement;
 
 public class SlimeMovement : MonoBehaviour
 {
+    [Header("Movement Settings")]
+    public float baseVelocity = 10f;
+    public float runMultiplier = 1.5f;
+    public float jumpForce = 300f;
+
+    [Header("Health Settings")]
+    public int maxHealth = 100;
+    private int currentHealth;
+
+    [Header("UI References")]
+    public Slider healthBar;
+    public TMP_Text healthText;
+    public TMP_Text counter_Text;
+    public GameObject deathScreen;
+    public Button restartButton;
+    public Button menuButton;
+
+    [Header("Audio")]
+    public AudioClip hurtSFX;
+    public AudioClip jumpSFX;
+    public AudioClip coinSFX;
+
+    [Header("Level Management")]
+    public int currentLevel;
+
+    // Component references
     private Rigidbody2D rb;
     private Animator animator;
     private AudioSource audioSource;
     private SpriteRenderer spriteRenderer;
 
-    public float baseVelocity = 10f;
-    public float runMultiplier = 1.5f;
-    public float jumpForce = 300f;
-
+    // State tracking
     private bool isGrounded = true;
     private bool isDead = false;
     private bool isHurt = false;
-
-    // Health System
-    public int maxHealth = 100;
-    private int currentHealth;
-
-    // UI Elements
-    public Slider healthBar;
-    public TMP_Text healthText;
-
-    // Coin Collection
-    private int coinCounter = 0; // Local coin counter
-    public TMP_Text counter_Text;
-
-    // Audio Clips for SFX
-    public AudioClip hurtSFX;
-
-    // Death Screen UI
-    public GameObject deathScreen; // Assign this in the Inspector
-    public Button restartButton;   // Assign Restart Button
-    public Button menuButton;      // Assign Menu Button
-
-    public int currentLevel; // Set this in the Inspector (e.g., 1 for Level 1, 2 for Level 2)
+    private int coinCounter = 0;
 
     private void Awake()
     {
+        // Get component references
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         audioSource = GetComponent<AudioSource>();
 
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        // Initialize health and UI
         currentHealth = maxHealth;
         UpdateHealthUI();
 
-        // Load coins ONLY if transitioning to a new level
+        // Load saved coins
+        LoadCoins();
+
+        // Initialize UI elements
+        InitializeUI();
+    }
+
+    private void LoadCoins()
+    {
+        // Load coins from previous level if available
         if (PlayerPrefs.HasKey("CoinCount"))
         {
             coinCounter = PlayerPrefs.GetInt("CoinCount");
-            UpdateCoinUI();
         }
         else
         {
             coinCounter = 0;
-            UpdateCoinUI();
         }
+        UpdateCoinUI();
+    }
 
-        // Ensure Death Screen is hidden at start
+    private void InitializeUI()
+    {
+        // Hide death screen initially
         if (deathScreen != null)
             deathScreen.SetActive(false);
 
@@ -104,6 +124,10 @@ public class SlimeMovement : MonoBehaviour
             rb.AddForce(Vector2.up * jumpForce);
             animator.SetTrigger("Jump");
             isGrounded = false;
+
+            // Play jump sound
+            if (jumpSFX != null)
+                PlaySFX(jumpSFX);
         }
     }
 
@@ -120,10 +144,25 @@ public class SlimeMovement : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (collision.CompareTag("KillZone")) // If player falls into Kill Barrier
+        {
+            // Set health to zero before dying
+            currentHealth = 0;
+            UpdateHealthUI();
+            Die();
+        }
+
         if (collision.CompareTag("Coin"))
         {
+            // Randomize pitch for variety
             audioSource.pitch = UnityEngine.Random.Range(1f, 1.5f);
-            audioSource.Play();
+
+            // Play coin sound
+            if (coinSFX != null)
+                PlaySFX(coinSFX);
+            else
+                audioSource.Play(); // Fallback to default audio source clip
+
             coinCounter++;
             UpdateCoinUI();
             Destroy(collision.gameObject);
@@ -222,8 +261,7 @@ public class SlimeMovement : MonoBehaviour
         animator.SetTrigger("Dead");
 
         // Stop all movement and disable physics
-        rb.velocity = Vector2.zero; // Stop rigidbody movement
-        rb.simulated = false;       // Disable physics simulation
+        DisableMovement();
 
         // Unlock the next level
         UnlockNextLevel();
@@ -236,8 +274,15 @@ public class SlimeMovement : MonoBehaviour
         PlayerPrefs.DeleteKey("CoinCount");
     }
 
+    private void DisableMovement()
+    {
+        rb.velocity = Vector2.zero;
+        rb.simulated = false;
+    }
+
     public void RestartLevel()
     {
+        ResetPlayer();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -245,8 +290,14 @@ public class SlimeMovement : MonoBehaviour
     {
         // Unlock the next level
         UnlockNextLevel();
+        ResetPlayer();
+        SceneManager.LoadScene("StartMenu");
+    }
 
-        SceneManager.LoadScene("StartMenu"); // Replace "MainMenu" with your actual menu scene name
+    private void ResetPlayer()
+    {
+        // Reset time scale in case it was changed by pause menu
+        Time.timeScale = 1f;
     }
 
     private void UnlockNextLevel()
@@ -259,10 +310,6 @@ public class SlimeMovement : MonoBehaviour
             PlayerPrefs.SetInt($"Level{nextLevel}Unlocked", 1);
             PlayerPrefs.Save();
             Debug.Log($"Level {nextLevel} unlocked!");
-        }
-        else
-        {
-            Debug.Log($"Level {nextLevel} is already unlocked.");
         }
     }
 }

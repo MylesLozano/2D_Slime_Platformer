@@ -7,12 +7,23 @@ public class EnterPortal : MonoBehaviour
 
     [SerializeField] private string nextSceneName; // Name of the next scene to load
     [SerializeField] private GameObject uiPrompt;  // UI prompt to display "Press E to Enter"
+    [SerializeField] private AudioSource portalAudioSource; // Reference to the AudioSource component
 
     private void Start()
     {
         // Ensure the UI prompt is hidden at the start
         if (uiPrompt != null)
             uiPrompt.SetActive(false);
+
+        // Ensure the AudioSource is assigned
+        if (portalAudioSource == null)
+        {
+            portalAudioSource = GetComponent<AudioSource>();
+            if (portalAudioSource == null)
+            {
+                Debug.LogWarning("No AudioSource found on the portal. Please add an AudioSource component.");
+            }
+        }
     }
 
     private void Update()
@@ -52,6 +63,16 @@ public class EnterPortal : MonoBehaviour
 
     private void SaveCoinsAndLoadNextScene()
     {
+        // Play the portal sound effect
+        if (portalAudioSource != null && portalAudioSource.clip != null)
+        {
+            portalAudioSource.Play();
+        }
+        else
+        {
+            Debug.LogWarning("Portal AudioSource or AudioClip is not set.");
+        }
+
         // Save coins before loading the next scene
         SlimeMovement player = FindObjectOfType<SlimeMovement>();
         if (player != null)

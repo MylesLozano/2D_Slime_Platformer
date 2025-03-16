@@ -6,16 +6,15 @@ public class MainMenu : MonoBehaviour
 {
     private AudioSource audioSource;
 
-    public AudioClip backgroundMusic;
-
-    public GameObject settingsMenu; // Reference to the SettingsMenu Panel
-    public Slider volumeSlider; // Volume slider
-    public Toggle musicToggle; // Music on/off toggle
+    [SerializeField] private AudioClip backgroundMusic; // Background music clip
+    [SerializeField] private GameObject settingsMenu; // Reference to the SettingsMenu Panel
+    [SerializeField] private Slider volumeSlider; // Volume slider
+    [SerializeField] private Toggle musicToggle; // Music on/off toggle
 
     private void Start()
     {
         // Initialize AudioSource
-        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource = GetComponent<AudioSource>() ?? gameObject.AddComponent<AudioSource>();
         audioSource.clip = backgroundMusic;
         audioSource.loop = true;
         audioSource.playOnAwake = true;

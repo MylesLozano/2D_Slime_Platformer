@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
-    public GameObject pauseMenuPanel; // Reference to the Pause Menu Panel
-    public Slider volumeSlider;       // Reference to the Volume Slider
+    [SerializeField] private GameObject pauseMenuPanel; // Reference to the Pause Menu Panel
+    [SerializeField] private Slider volumeSlider; // Reference to the Volume Slider
 
     private bool isPaused = false;
 

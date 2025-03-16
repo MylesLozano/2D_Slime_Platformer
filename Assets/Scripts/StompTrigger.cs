@@ -2,17 +2,13 @@ using UnityEngine;
 
 public class StompTrigger : MonoBehaviour
 {
-    public AudioClip stompSFX; // Stomp sound effect
+    [SerializeField] private AudioClip stompSFX; // Stomp sound effect
     private AudioSource audioSource;
 
     private void Start()
     {
         // Find or add an AudioSource on the parent object
-        audioSource = GetComponentInParent<AudioSource>();
-        if (audioSource == null)
-        {
-            audioSource = GetComponentInParent<Transform>().gameObject.AddComponent<AudioSource>();
-        }
+        audioSource = GetComponentInParent<AudioSource>() ?? GetComponentInParent<Transform>().gameObject.AddComponent<AudioSource>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
