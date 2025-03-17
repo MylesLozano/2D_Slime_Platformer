@@ -18,17 +18,22 @@ public class LevelSelectionManager : MonoBehaviour
         }
 
         // Unlock the first level by default
-        if (!PlayerPrefs.HasKey("Level1Unlocked"))
-        {
-            PlayerPrefs.SetInt("Level1Unlocked", 1);
-            PlayerPrefs.Save();
-        }
+        PlayerPrefs.SetInt("Level1Unlocked", 1);
+        PlayerPrefs.Save();
 
         // Check PlayerPrefs to lock/unlock levels and update UI
+        UpdateLevelButtons();
+    }
+
+    private void UpdateLevelButtons()
+    {
         for (int i = 0; i < levelButtons.Length; i++)
         {
             int levelIndex = i + 1; // Level index starts from 1
             bool isUnlocked = PlayerPrefs.GetInt($"Level{levelIndex}Unlocked", 0) == 1;
+
+            // Debug log to check the status of each level
+            Debug.Log($"Level {levelIndex} is unlocked: {isUnlocked}");
 
             // Update button interactability
             levelButtons[i].interactable = isUnlocked;

@@ -263,8 +263,13 @@ public class SlimeMovement : MonoBehaviour
         // Stop all movement and disable physics
         DisableMovement();
 
-        // Unlock the next level
-        UnlockNextLevel();
+        // Unlock the current level (except Level 1, which is always unlocked)
+        if (currentLevel > 1)
+        {
+            PlayerPrefs.SetInt($"Level{currentLevel}Unlocked", 1);
+            PlayerPrefs.Save();
+            Debug.Log($"Level {currentLevel} unlocked on death.");
+        }
 
         // Show Death Screen
         if (deathScreen != null)
@@ -288,10 +293,9 @@ public class SlimeMovement : MonoBehaviour
 
     public void BackToMenu()
     {
-        // Unlock the next level
-        UnlockNextLevel();
-        ResetPlayer();
-        SceneManager.LoadScene("StartMenu");
+        // Ensure levels remain unlocked
+        Time.timeScale = 1f; // Reset time scale
+        SceneManager.LoadScene("StartMenu"); // Load the Main Menu scene
     }
 
     private void ResetPlayer()

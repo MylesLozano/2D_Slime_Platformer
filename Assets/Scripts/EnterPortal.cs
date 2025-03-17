@@ -63,20 +63,16 @@ public class EnterPortal : MonoBehaviour
 
     private void SaveCoinsAndLoadNextScene()
     {
-        // Play the portal sound effect
-        if (portalAudioSource != null && portalAudioSource.clip != null)
-        {
-            portalAudioSource.Play();
-        }
-        else
-        {
-            Debug.LogWarning("Portal AudioSource or AudioClip is not set.");
-        }
-
-        // Save coins before loading the next scene
+        // Unlock the current level
         SlimeMovement player = FindObjectOfType<SlimeMovement>();
         if (player != null)
         {
+            int currentLevel = player.currentLevel;
+            PlayerPrefs.SetInt($"Level{currentLevel}Unlocked", 1);
+            PlayerPrefs.Save();
+            Debug.Log($"Level {currentLevel} unlocked on portal entry.");
+
+            // Save coins before loading the next scene
             player.SaveCoinsOnLevelComplete();
         }
         else
