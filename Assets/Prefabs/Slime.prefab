@@ -198,7 +198,7 @@ MonoBehaviour:
   restartButton: {fileID: 0}
   menuButton: {fileID: 0}
   hurtSFX: {fileID: 8300000, guid: 8ada8843bf313ea4f99b1a22fa87847d, type: 3}
-  jumpSFX: {fileID: 0}
+  jumpSFX: {fileID: 8300000, guid: 12d0286cc0ae99342a72fe1cdec12d87, type: 3}
   coinSFX: {fileID: 8300000, guid: 6fdd5541162154a4697f7ade3ed1cb8a, type: 3}
   currentLevel: 1
 --- !u!70 &7348003405228000844
