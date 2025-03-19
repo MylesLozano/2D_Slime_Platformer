@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -45,7 +45,6 @@ public class SlimeMovement : MonoBehaviour
 
     private void Awake()
     {
-        // Get component references
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -56,20 +55,15 @@ public class SlimeMovement : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
         }
 
-        // Initialize health and UI
         currentHealth = maxHealth;
         UpdateHealthUI();
 
-        // Load saved coins
         LoadCoins();
-
-        // Initialize UI elements
         InitializeUI();
     }
 
     private void LoadCoins()
     {
-        // Load coins from previous level if available
         if (PlayerPrefs.HasKey("CoinCount"))
         {
             coinCounter = PlayerPrefs.GetInt("CoinCount");
@@ -83,11 +77,9 @@ public class SlimeMovement : MonoBehaviour
 
     private void InitializeUI()
     {
-        // Hide death screen initially
         if (deathScreen != null)
             deathScreen.SetActive(false);
 
-        // Hook up button events
         if (restartButton != null)
             restartButton.onClick.AddListener(RestartLevel);
         if (menuButton != null)
@@ -125,7 +117,6 @@ public class SlimeMovement : MonoBehaviour
             animator.SetTrigger("Jump");
             isGrounded = false;
 
-            // Play jump sound
             if (jumpSFX != null)
                 PlaySFX(jumpSFX);
         }
@@ -138,15 +129,14 @@ public class SlimeMovement : MonoBehaviour
 
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            TakeDamage(20); // Take damage when colliding with an enemy
+            TakeDamage(20);
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("KillZone")) // If player falls into Kill Barrier
+        if (collision.CompareTag("KillZone"))
         {
-            // Set health to zero before dying
             currentHealth = 0;
             UpdateHealthUI();
             Die();
@@ -154,14 +144,11 @@ public class SlimeMovement : MonoBehaviour
 
         if (collision.CompareTag("Coin"))
         {
-            // Randomize pitch for variety
             audioSource.pitch = UnityEngine.Random.Range(1f, 1.5f);
-
-            // Play coin sound
             if (coinSFX != null)
                 PlaySFX(coinSFX);
             else
-                audioSource.Play(); // Fallback to default audio source clip
+                audioSource.Play();
 
             coinCounter++;
             UpdateCoinUI();
@@ -179,7 +166,6 @@ public class SlimeMovement : MonoBehaviour
 
     public void SaveCoinsOnLevelComplete()
     {
-        // Save coins when transitioning to the next level
         PlayerPrefs.SetInt("CoinCount", coinCounter);
         PlayerPrefs.Save();
     }
@@ -260,15 +246,14 @@ public class SlimeMovement : MonoBehaviour
         isDead = true;
         animator.SetTrigger("Dead");
 
-        // Stop all movement and disable physics
         DisableMovement();
+        UnlockAllPreviousLevels(); //Unlocks all previous levels!
 
-        // Show Death Screen
         if (deathScreen != null)
             deathScreen.SetActive(true);
 
-        // Reset coin count on death
         PlayerPrefs.DeleteKey("CoinCount");
+        PlayerPrefs.Save();
     }
 
     private void DisableMovement()
@@ -285,21 +270,22 @@ public class SlimeMovement : MonoBehaviour
 
     public void BackToMenu()
     {
-        // Unlock the current level before returning to the main menu
-        if (currentLevel > 1) // Level 1 is always unlocked
-        {
-            PlayerPrefs.SetInt($"Level{currentLevel}Unlocked", 1);
-            PlayerPrefs.Save();
-            Debug.Log($"Level {currentLevel} unlocked before returning to the main menu.");
-        }
-
+        UnlockAllPreviousLevels(); //Unlock before going to menu
         ResetPlayer();
         SceneManager.LoadScene("StartMenu");
     }
 
     private void ResetPlayer()
     {
-        // Reset time scale in case it was changed by pause menu
         Time.timeScale = 1f;
+    }
+
+    private void UnlockAllPreviousLevels()
+    {
+        for (int i = 1; i <= currentLevel; i++)
+        {
+            PlayerPrefs.SetInt($"Level{i}Unlocked", 1);
+        }
+        PlayerPrefs.Save();
     }
 }

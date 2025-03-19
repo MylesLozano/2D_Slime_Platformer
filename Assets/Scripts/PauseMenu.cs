@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -77,20 +77,24 @@ public class PauseMenu : MonoBehaviour
 
     public void BackToMainMenu()
     {
-        // Unlock the current level before returning to the main menu
-        if (currentLevel > 1) // Level 1 is always unlocked
-        {
-            PlayerPrefs.SetInt($"Level{currentLevel}Unlocked", 1);
-            PlayerPrefs.Save();
-            Debug.Log($"Level {currentLevel} unlocked before returning to the main menu.");
-        }
+        UnlockAllPreviousLevels(); // 🔥 Unlock all previous levels before quitting
 
         Time.timeScale = 1f; // Ensure time is reset
-        SceneManager.LoadScene("StartMenu"); // Load the Main Menu scene
+        SceneManager.LoadScene("StartMenu");
     }
 
     public void AdjustVolume(float volume)
     {
         AudioListener.volume = volume; // Adjust global volume
     }
+
+    private void UnlockAllPreviousLevels()
+    {
+        for (int i = 1; i <= currentLevel; i++)
+        {
+            PlayerPrefs.SetInt($"Level{i}Unlocked", 1);
+        }
+        PlayerPrefs.Save();
+    }
+
 }

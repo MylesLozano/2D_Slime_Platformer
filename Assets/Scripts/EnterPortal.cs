@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class EnterPortal : MonoBehaviour
 {
@@ -63,16 +64,35 @@ public class EnterPortal : MonoBehaviour
 
     private void SaveCoinsAndLoadNextScene()
     {
-        // Unlock the current level
+        // Play the portal sound effect
+        if (portalAudioSource != null && portalAudioSource.clip != null)
+        {
+            portalAudioSource.Play();
+        }
+        else
+        {
+            Debug.LogWarning("Portal AudioSource or AudioClip is not set.");
+        }
+
+        // Save coins before loading the next scene
         SlimeMovement player = FindObjectOfType<SlimeMovement>();
         if (player != null)
         {
             int currentLevel = player.currentLevel;
-            PlayerPrefs.SetInt($"Level{currentLevel}Unlocked", 1);
-            PlayerPrefs.Save();
-            Debug.Log($"Level {currentLevel} unlocked on portal entry.");
 
-            // Save coins before loading the next scene
+            // Unlock the current level
+            PlayerPrefs.SetInt($"Level{currentLevel}Unlocked", 1);
+
+            // If this is Level 5, unlock all levels
+            if (SceneManager.GetActiveScene().name == "Level5")
+            {
+                UnlockAllLevels();
+            }
+
+            // Save changes to PlayerPrefs
+            PlayerPrefs.Save();
+
+            // Save coins
             player.SaveCoinsOnLevelComplete();
         }
         else
@@ -80,15 +100,33 @@ public class EnterPortal : MonoBehaviour
             Debug.LogWarning("SlimeMovement script not found. Coins will not be saved.");
         }
 
-        // Load the next scene
+        // Load the next scene with a small delay
         if (!string.IsNullOrEmpty(nextSceneName))
         {
             Debug.Log("Loading scene: " + nextSceneName);
-            SceneManager.LoadScene(nextSceneName);
+            StartCoroutine(LoadNextSceneAfterDelay(0.5f, nextSceneName)); // Add a 0.5-second delay
         }
         else
         {
             Debug.LogError("Next scene name is not set in the inspector!");
         }
+    }
+
+    private void UnlockAllLevels()
+    {
+        for (int i = 1; i <= 5; i++) // Unlock all 5 levels
+        {
+            PlayerPrefs.SetInt($"Level{i}Unlocked", 1);
+            Debug.Log($"Level {i} unlocked!");
+        }
+        PlayerPrefs.Save();
+        Debug.Log("All levels unlocked and saved!");
+    }
+
+    private IEnumerator LoadNextSceneAfterDelay(float delay, string sceneName)
+    {
+        yield return new WaitForSeconds(delay); // Wait for the specified delay
+        SceneManager.LoadScene(sceneName); // Load the next scene
+        Debug.Log("SCENE LOADED!");
     }
 }

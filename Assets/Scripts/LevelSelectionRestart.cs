@@ -1,5 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class LevelSelectionRestart : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class LevelSelectionRestart : MonoBehaviour
     private void ResetEverything()
     {
         // Reset all level unlocks
-        for (int i = 1; i <= 5; i++) // Adjust the number of levels as needed
+        for (int i = 1; i <= 5; i++) // Adjust based on total levels
         {
             PlayerPrefs.DeleteKey($"Level{i}Unlocked");
         }
@@ -29,15 +30,14 @@ public class LevelSelectionRestart : MonoBehaviour
         // Unlock the first level by default
         PlayerPrefs.SetInt("Level1Unlocked", 1);
 
-        // Reset coins
+        // Reset coins and player progress
         PlayerPrefs.DeleteKey("CoinCount");
-
-        // Save changes
+        PlayerPrefs.DeleteAll(); //Fully resets all stored progress
         PlayerPrefs.Save();
 
-        Debug.Log("All progress has been reset.");
+        Debug.Log("All game progress has been reset to default.");
 
-        // Reload the level selection scene to update the UI
-        UnityEngine.SceneManagement.SceneManager.LoadScene("LevelSelection");
+        // Reload the level selection scene to reflect changes
+        SceneManager.LoadScene("LevelSelection");
     }
 }
