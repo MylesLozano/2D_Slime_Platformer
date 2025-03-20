@@ -189,7 +189,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   baseVelocity: 10
   runMultiplier: 1.5
-  jumpForce: 400
+  jumpForce: 10
+  coyoteTime: 0.1
   maxHealth: 100
   healthBar: {fileID: 0}
   healthText: {fileID: 0}
