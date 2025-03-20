@@ -10,6 +10,7 @@ public class SlimeMovement : MonoBehaviour
     public float baseVelocity = 10f;
     public float runMultiplier = 1.5f;
     public float jumpForce = 300f;
+    public float coyoteTime = 0.1f; // Time in seconds to allow jumping after leaving the ground
 
     [Header("Health Settings")]
     public int maxHealth = 100;
@@ -42,6 +43,7 @@ public class SlimeMovement : MonoBehaviour
     private bool isDead = false;
     private bool isHurt = false;
     private int coinCounter = 0;
+    private float coyoteTimeCounter; // Tracks the remaining coyote time
 
     private void Awake()
     {
@@ -92,6 +94,16 @@ public class SlimeMovement : MonoBehaviour
 
         HandleMovement();
         HandleJump();
+
+        // Update coyote time
+        if (isGrounded)
+        {
+            coyoteTimeCounter = coyoteTime; // Reset coyote time when grounded
+        }
+        else
+        {
+            coyoteTimeCounter -= Time.deltaTime; // Decrease coyote time when not grounded
+        }
     }
 
     private void HandleMovement()
@@ -111,11 +123,13 @@ public class SlimeMovement : MonoBehaviour
 
     private void HandleJump()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space) && (isGrounded || coyoteTimeCounter > 0))
         {
-            rb.AddForce(Vector2.up * jumpForce);
+            rb.velocity = new Vector2(rb.velocity.x, 0); // Reset vertical velocity before jumping
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
             animator.SetTrigger("Jump");
             isGrounded = false;
+            coyoteTimeCounter = 0; // Reset coyote time after jumping
 
             if (jumpSFX != null)
                 PlaySFX(jumpSFX);
@@ -125,11 +139,21 @@ public class SlimeMovement : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.CompareTag("Ground"))
+        {
             isGrounded = true;
+        }
 
         if (collision.gameObject.CompareTag("Enemy"))
         {
             TakeDamage(20);
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false;
         }
     }
 
@@ -247,7 +271,7 @@ public class SlimeMovement : MonoBehaviour
         animator.SetTrigger("Dead");
 
         DisableMovement();
-        UnlockAllPreviousLevels(); //Unlocks all previous levels!
+        UnlockAllPreviousLevels(); // Unlocks all previous levels!
 
         if (deathScreen != null)
             deathScreen.SetActive(true);
@@ -270,7 +294,7 @@ public class SlimeMovement : MonoBehaviour
 
     public void BackToMenu()
     {
-        UnlockAllPreviousLevels(); //Unlock before going to menu
+        UnlockAllPreviousLevels(); // Unlock before going to menu
         ResetPlayer();
         SceneManager.LoadScene("StartMenu");
     }
